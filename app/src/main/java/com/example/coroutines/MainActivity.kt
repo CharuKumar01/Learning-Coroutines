@@ -1,15 +1,22 @@
 package com.example.coroutines
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.databinding.DataBindingUtil
 import com.example.coroutines.databinding.ActivityMainBinding
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
     private lateinit var bind: ActivityMainBinding
+    private var fbFollowers = 0
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -21,6 +28,23 @@ class MainActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
+        CoroutineScope(Dispatchers.IO).launch {
+            printFollowers()
+            Log.d("check", "${fbFollowers.toString()} inside onCreate function")
+        }
     }
     //here we goooooooooooooooooo!
+
+    private suspend fun printFollowers() {
+        CoroutineScope(Dispatchers.IO).launch {
+            fbFollowers = getFbFollowers()
+        }
+        Log.d("check", fbFollowers.toString())
+    }
+
+    private suspend fun getFbFollowers(): Int {
+        delay(1000)
+        return 54
+    }
 }
