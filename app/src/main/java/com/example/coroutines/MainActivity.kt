@@ -10,12 +10,12 @@ import androidx.databinding.DataBindingUtil
 import com.example.coroutines.databinding.ActivityMainBinding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
     private lateinit var bind: ActivityMainBinding
-    private var fbFollowers = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,22 +29,35 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
-        CoroutineScope(Dispatchers.IO).launch {
-            printFollowers()
-            Log.d("check", "${fbFollowers.toString()} inside onCreate function")
+//        CoroutineScope(Dispatchers.IO).launch {
+//            printFollowers()
+//            val fbFollowers = getFbFollowers()
+//            Log.d("check", "${fbFollowers.toString()} inside onCreate function")
+//        }
+
+        val tvInstagram = bind.tvInstagram
+        val tvFacebook = bind.tvFacebook
+        val btnFetch = bind.btnFetch
+
+        val job = CoroutineScope(Dispatchers.IO).async {
+            val fbFollowers = async { getFbFollowers() }
+            val getInstagramFollowers = async { getInstagramFollowers() }
+
+            Log.d("check", "Facebook -> ${fbFollowers.await()} & Instagram -> ${getInstagramFollowers.await()}")
         }
     }
     //here we goooooooooooooooooo!
 
-    private suspend fun printFollowers() {
-        CoroutineScope(Dispatchers.IO).launch {
-            fbFollowers = getFbFollowers()
-        }
-        Log.d("check", fbFollowers.toString())
-    }
+//    private suspend fun printFollowers() {
+//    }
 
     private suspend fun getFbFollowers(): Int {
         delay(1000)
         return 54
+    }
+
+    private suspend fun getInstagramFollowers(): Int {
+        delay(1000)
+        return 108
     }
 }
