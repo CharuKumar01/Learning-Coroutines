@@ -1,5 +1,6 @@
 package com.example.coroutines
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.enableEdgeToEdge
@@ -7,16 +8,19 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.lifecycleScope
 import com.example.coroutines.databinding.ActivityMainBinding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class MainActivity : AppCompatActivity() {
     private lateinit var bind: ActivityMainBinding
 
+    @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -39,17 +43,21 @@ class MainActivity : AppCompatActivity() {
         val tvFacebook = bind.tvFacebook
         val btnFetch = bind.btnFetch
 
-        val job = CoroutineScope(Dispatchers.IO).async {
-            val fbFollowers = async { getFbFollowers() }
-            val getInstagramFollowers = async { getInstagramFollowers() }
+        btnFetch.setOnClickListener {
+            lifecycleScope.launch(Dispatchers.IO) {
+                val getFbFollowers = async { getFbFollowers() }
+                val getInstagramFollowers = async { getInstagramFollowers() }
 
-            Log.d("check", "Facebook -> ${fbFollowers.await()} & Instagram -> ${getInstagramFollowers.await()}")
+                val fbResult = getFbFollowers.await()
+                val instagramResult = getInstagramFollowers.await()
+
+                withContext(Dispatchers.Main) {
+                    tvFacebook.text = "Facebook Followers - $fbResult"
+                    tvInstagram.text = "Instagram Followers - $instagramResult"
+                }
+            }
         }
     }
-    //here we goooooooooooooooooo!
-
-//    private suspend fun printFollowers() {
-//    }
 
     private suspend fun getFbFollowers(): Int {
         delay(1000)
